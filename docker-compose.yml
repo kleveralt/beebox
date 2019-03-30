@@ -1,0 +1,51 @@
+version: "3"
+services:
+  RF:
+    image: wonderfall/rtorrent-flood
+    ports:
+      - "49184:49184"
+      - "3000:3000"
+    volumes:
+      - "./data:/data"
+      - "./flood-db:/flood-db"
+    tty: true
+    networks:
+      dockerbridge:
+    restart: always
+    
+  RU:
+    image: diameter/rtorrent-rutorrent:latest
+    ports:
+      - "8080:80"
+      - "49160:49160/udp"
+      - "49161:49161"
+    volumes:
+      - "./downloads:/downloads"
+    networks:
+      dockerbridge:
+    restart: always
+    
+  deluge:
+    image: binhex/arch-deluge
+    container_name: deluge
+    ports:
+      - "8112:8112"
+      - "58846:58846"
+      - "58946:58946"
+    environment:
+      - PUID=0
+      - PGID=0
+      - UMASK_SET=022
+      - DELUGE_DAEMON_LOG_LEVEL=warning
+      - DELUGE_WEB_LOG_LEVEL=warning
+    volumes:
+      - ./config:/config
+      - ./downloads:/data
+      - ./downloads:/downloads
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+
+networks:
+  dockerbridge:
+    external:
+      name: dockerbridge
